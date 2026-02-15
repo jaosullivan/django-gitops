@@ -1,0 +1,5 @@
+image:
+  repository: ghcr.io/jaosullivan/django-app
+  tag: latest
+service:
+  port: 8000
