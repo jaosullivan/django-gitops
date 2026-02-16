@@ -2,37 +2,30 @@
 # Blue/Green deployment identity
 # -------------------------------------------------------------------
 color: default
-
 # NEW: Active service for ingress routing (dynamic)
 activeService: django-app-default
-
 # Number of Django pods
 replicaCount: 1
-
 # -------------------------------------------------------------------
 # Image settings
 # Jenkins will override repository + tag during CI/CD
 # -------------------------------------------------------------------
 image:
   repository: ghcr.io/jaosullivan/django-app
-  tag: landingpage-v1
+  tag: ${GIT_SHA}
   pullPolicy: IfNotPresent
-
 imagePullSecrets:
   - name: ghcr-secret
-
 # -------------------------------------------------------------------
 # Git metadata (Jenkins writes this during CI/CD)
 # -------------------------------------------------------------------
 gitSha: "unknown"
 appVersion: "dev"
-
 # -------------------------------------------------------------------
 # Naming
 # -------------------------------------------------------------------
 nameOverride: ""
 fullnameOverride: ""
-
 # -------------------------------------------------------------------
 # Service account
 # -------------------------------------------------------------------
@@ -41,15 +34,12 @@ serviceAccount:
   automount: true
   annotations: {}
   name: ""
-
 # Pod metadata
 podAnnotations: {}
 podLabels: {}
-
 # Security context
 podSecurityContext: {}
 securityContext: {}
-
 # -------------------------------------------------------------------
 # Environment variables injected into the Django container
 # -------------------------------------------------------------------
@@ -58,73 +48,58 @@ env:
     valueFrom:
       fieldRef:
         fieldPath: metadata.name
-
   - name: POD_NAMESPACE
     valueFrom:
       fieldRef:
         fieldPath: metadata.namespace
-
   - name: APP_VERSION
     value: "{{ .Values.appVersion }}"
-
   - name: GIT_SHA
     value: "{{ .Values.gitSha }}"
-
 # -------------------------------------------------------------------
 # Kubernetes Service
 # -------------------------------------------------------------------
 service:
   type: ClusterIP
   port: 8000
-
 # -------------------------------------------------------------------
 # Ingress (Traefik)
 # -------------------------------------------------------------------
 ingress:
   enabled: true
   className: traefik
-
   annotations:
     kubernetes.io/ingress.class: traefik
-
   hosts:
     - host: django.local
       paths:
         - path: /
           pathType: Prefix
-
   tls: []
-
 # Resources
 resources: {}
-
 # Health checks
 livenessProbe:
   httpGet:
     path: /health/
     port: http
-
 readinessProbe:
   httpGet:
     path: /health/
     port: http
-
 # Autoscaling
 autoscaling:
   enabled: false
   minReplicas: 1
   maxReplicas: 100
   targetCPUUtilizationPercentage: 80
-
 # Volumes
 volumes: []
 volumeMounts: []
-
 # Scheduling
 nodeSelector: {}
 tolerations: []
 affinity: {}
-
 # -------------------------------------------------------------------
 # Database migration Job
 # -------------------------------------------------------------------
