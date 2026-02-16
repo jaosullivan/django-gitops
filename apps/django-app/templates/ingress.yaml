@@ -37,8 +37,8 @@ spec:
             {{- end }}
             backend:
               service:
-                # Default backend (BLUE). Jenkins will patch this.
-                name: django-blue-django-app
+                # Updated backend (DEFAULT). Blue is gone.
+                name: django-app-default
                 port:
                   number: {{ $.Values.service.port }}
           {{- end }}
