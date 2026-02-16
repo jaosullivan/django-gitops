@@ -25,7 +25,7 @@ spec:
       containers:
         - name: migrate
           image: "{{ .Values.migrate.image.repository }}:{{ .Values.migrate.image.tag }}"
-          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          imagePullPolicy: {{ .Values.migrate.image.pullPolicy | default .Values.image.pullPolicy }}
           command: ["python"]
           args: ["manage.py", "migrate", "--noinput"]
 
