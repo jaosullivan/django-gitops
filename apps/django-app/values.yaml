@@ -3,6 +3,9 @@
 # -------------------------------------------------------------------
 color: default
 
+# NEW: Active service for ingress routing (dynamic)
+activeService: django-app-default
+
 # Number of Django pods
 replicaCount: 1
 

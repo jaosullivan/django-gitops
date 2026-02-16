@@ -37,8 +37,8 @@ spec:
             {{- end }}
             backend:
               service:
-                # Updated backend (DEFAULT). Blue is gone.
-                name: django-app-default
+                # Dynamic backend — Jenkins updates .Values.activeService
+                name: {{ $.Values.activeService }}
                 port:
                   number: {{ $.Values.service.port }}
           {{- end }}
