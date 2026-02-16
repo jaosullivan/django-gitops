@@ -1,7 +1,7 @@
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: django-app
+  name: django-green-django-app-green
 spec:
   rules:
     - host: django.local
@@ -11,6 +11,6 @@ spec:
             pathType: Prefix
             backend:
               service:
-                name: django-blue-django-app-blue
+                name: django-green-django-app-green
                 port:
                   number: 8000
