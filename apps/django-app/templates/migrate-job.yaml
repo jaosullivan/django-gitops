@@ -1,0 +1,48 @@
+{{- if .Values.migrate.enabled }}
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: "{{ include "django-app.fullname" . }}-migrate-{{ .Values.color }}"
+  labels:
+    {{- include "django-app.labels" . | nindent 4 }}
+    color: {{ .Values.color }}
+  annotations:
+    "helm.sh/hook": pre-install,pre-upgrade
+    "helm.sh/hook-weight": "5"
+    "helm.sh/hook-delete-policy": before-hook-creation,hook-succeeded
+
+spec:
+  backoffLimit: 3
+  template:
+    metadata:
+      labels:
+        {{- include "django-app.labels" . | nindent 8 }}
+        color: {{ .Values.color }}
+    spec:
+      restartPolicy: Never
+      serviceAccountName: {{ include "django-app.serviceAccountName" . }}
+      containers:
+        - name: migrate
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          command: ["python"]
+          args: ["manage.py", "migrate", "--noinput"]
+
+          env:
+            {{- if .Values.env }}
+            {{- range $key, $value := .Values.env }}
+            - name: {{ $key }}
+              value: "{{ $value }}"
+            {{- end }}
+            {{- end }}
+
+            {{- if .Values.secretEnv }}
+            {{- range $key, $value := .Values.secretEnv }}
+            - name: {{ $key }}
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "django-app.fullname" $ }}-secret
+                  key: {{ $key }}
+            {{- end }}
+            {{- end }}
+{{- end }}
