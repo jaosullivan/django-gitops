@@ -5,13 +5,16 @@ metadata:
   namespace: argocd
 spec:
   project: default
+
   source:
-    repoURL: https://github.com/jaosullivan/django-gitops
+    repoURL: https://github.com/jaosullivan/django-gitops.git
     targetRevision: main
-    path: clusters/production
+    path: apps/django-app
+
   destination:
     server: https://kubernetes.default.svc
     namespace: default
+
   syncPolicy:
     automated:
       prune: true
