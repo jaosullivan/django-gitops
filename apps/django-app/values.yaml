@@ -6,26 +6,31 @@ color: default
 activeService: django-app-default
 # Number of Django pods
 replicaCount: 1
+
 # -------------------------------------------------------------------
 # Image settings
 # Jenkins will override repository + tag during CI/CD
 # -------------------------------------------------------------------
 image:
   repository: ghcr.io/jaosullivan/django-app
-  tag: ${GIT_SHA}
+  tag: landingpage-v1
   pullPolicy: IfNotPresent
+
 imagePullSecrets:
   - name: ghcr-secret
+
 # -------------------------------------------------------------------
 # Git metadata (Jenkins writes this during CI/CD)
 # -------------------------------------------------------------------
 gitSha: "unknown"
 appVersion: "dev"
+
 # -------------------------------------------------------------------
 # Naming
 # -------------------------------------------------------------------
 nameOverride: ""
 fullnameOverride: ""
+
 # -------------------------------------------------------------------
 # Service account
 # -------------------------------------------------------------------
@@ -34,12 +39,15 @@ serviceAccount:
   automount: true
   annotations: {}
   name: ""
+
 # Pod metadata
 podAnnotations: {}
 podLabels: {}
+
 # Security context
 podSecurityContext: {}
 securityContext: {}
+
 # -------------------------------------------------------------------
 # Environment variables injected into the Django container
 # -------------------------------------------------------------------
@@ -56,12 +64,14 @@ env:
     value: "{{ .Values.appVersion }}"
   - name: GIT_SHA
     value: "{{ .Values.gitSha }}"
+
 # -------------------------------------------------------------------
 # Kubernetes Service
 # -------------------------------------------------------------------
 service:
   type: ClusterIP
   port: 8000
+
 # -------------------------------------------------------------------
 # Ingress (Traefik)
 # -------------------------------------------------------------------
@@ -76,10 +86,12 @@ ingress:
         - path: /
           pathType: Prefix
   tls: []
+
 # -------------------------------------------------------------------
 # Resources
 # -------------------------------------------------------------------
 resources: {}
+
 # -------------------------------------------------------------------
 # Health checks
 # -------------------------------------------------------------------
@@ -87,10 +99,12 @@ livenessProbe:
   httpGet:
     path: /health/
     port: http
+
 readinessProbe:
   httpGet:
     path: /health/
     port: http
+
 # -------------------------------------------------------------------
 # Autoscaling
 # -------------------------------------------------------------------
@@ -99,17 +113,20 @@ autoscaling:
   minReplicas: 1
   maxReplicas: 100
   targetCPUUtilizationPercentage: 80
+
 # -------------------------------------------------------------------
 # Volumes
 # -------------------------------------------------------------------
 volumes: []
 volumeMounts: []
+
 # -------------------------------------------------------------------
 # Scheduling
 # -------------------------------------------------------------------
 nodeSelector: {}
 tolerations: []
 affinity: {}
+
 # -------------------------------------------------------------------
 # Database migration Job
 # -------------------------------------------------------------------
@@ -117,5 +134,5 @@ migrate:
   enabled: true
   image:
     repository: ghcr.io/jaosullivan/django-app
-    tag: ${GIT_SHA}
+    tag: landingpage-v1
     pullPolicy: IfNotPresent
