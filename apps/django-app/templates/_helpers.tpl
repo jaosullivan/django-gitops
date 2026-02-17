@@ -3,11 +3,11 @@
 {{- end }}
 
 {{- define "django-app.fullname" -}}
-{{- if .Values.fullnameOverride }}
+{{- if .Values.fullnameOverride -}}
 {{- .Values.fullnameOverride | trunc 63 | trimSuffix "-" -}}
-{{- else }}
+{{- else -}}
 {{- printf "%s-%s" .Release.Name (include "django-app.name" .) | trunc 63 | trimSuffix "-" -}}
-{{- end }}
+{{- end -}}
 {{- end }}
 
 {{- define "django-app.labels" -}}
@@ -23,9 +23,9 @@ app.kubernetes.io/instance: {{ .Release.Name }}
 {{- end }}
 
 {{- define "django-app.serviceAccountName" -}}
-{{- if .Values.serviceAccount.name }}
-{{- .Values.serviceAccount.name }}
-{{- else }}
-{{ include "django-app.fullname" . }}-sa
-{{- end }}
-{{- end }}
+{{- if .Values.serviceAccount.name -}}
+{{- .Values.serviceAccount.name -}}
+{{- else -}}
+{{- include "django-app.fullname" . -}}-sa
+{{- end -}}
+{{- end -}}
