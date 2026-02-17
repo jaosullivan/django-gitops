@@ -2,41 +2,34 @@
 # Blue/Green deployment identity
 # -------------------------------------------------------------------
 color: blue
-
 blueGreen:
   enabled: true
   colors:
     - blue
     - green
-
 # -------------------------------------------------------------------
 # Replica settings
 # -------------------------------------------------------------------
 replicaCount: 1
-
 # -------------------------------------------------------------------
 # Image settings
 # -------------------------------------------------------------------
 image:
   repository: ghcr.io/jaosullivan/django-app
-  tag: "{{ .Values.gitSha }}"
+  tag: "${GIT_SHA}"
   pullPolicy: IfNotPresent
-
 imagePullSecrets:
   - name: ghcr-secret
-
 # -------------------------------------------------------------------
 # Git metadata
 # -------------------------------------------------------------------
 gitSha: "unknown"
 appVersion: "dev"
-
 # -------------------------------------------------------------------
 # Naming
 # -------------------------------------------------------------------
 nameOverride: ""
 fullnameOverride: ""
-
 # -------------------------------------------------------------------
 # Service account
 # -------------------------------------------------------------------
@@ -45,13 +38,10 @@ serviceAccount:
   automount: true
   annotations: {}
   name: ""
-
 podAnnotations: {}
 podLabels: {}
-
 podSecurityContext: {}
 securityContext: {}
-
 # -------------------------------------------------------------------
 # Environment variables
 # -------------------------------------------------------------------
@@ -60,27 +50,21 @@ env:
     valueFrom:
       fieldRef:
         fieldPath: metadata.name
-
   - name: POD_NAMESPACE
     valueFrom:
       fieldRef:
         fieldPath: metadata.namespace
-
   - name: APP_VERSION
     value: "{{ .Values.appVersion }}"
-
   - name: GIT_SHA
     value: "{{ .Values.gitSha }}"
-
 secretEnv: {}
-
 # -------------------------------------------------------------------
 # Service
 # -------------------------------------------------------------------
 service:
   type: ClusterIP
   port: 8000
-
 # -------------------------------------------------------------------
 # Ingress
 # -------------------------------------------------------------------
@@ -95,22 +79,18 @@ ingress:
         - path: /
           pathType: Prefix
   tls: []
-
 # -------------------------------------------------------------------
 # Resources & Probes
 # -------------------------------------------------------------------
 resources: {}
-
 livenessProbe:
   httpGet:
     path: /health/
     port: http
-
 readinessProbe:
   httpGet:
     path: /health/
     port: http
-
 # -------------------------------------------------------------------
 # Autoscaling
 # -------------------------------------------------------------------
@@ -119,17 +99,14 @@ autoscaling:
   minReplicas: 1
   maxReplicas: 100
   targetCPUUtilizationPercentage: 80
-
 # -------------------------------------------------------------------
 # Volumes & scheduling
 # -------------------------------------------------------------------
 volumes: []
 volumeMounts: []
-
 nodeSelector: {}
 tolerations: []
 affinity: {}
-
 # -------------------------------------------------------------------
 # Database migration Job
 # -------------------------------------------------------------------
@@ -137,5 +114,6 @@ migrate:
   enabled: true
   image:
     repository: ghcr.io/jaosullivan/django-app
-    tag: "{{ .Values.gitSha }}"
+    tag: "${GIT_SHA}"
     pullPolicy: IfNotPresent
+activeService: django-app-default
