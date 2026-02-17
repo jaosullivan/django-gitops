@@ -1,0 +1,72 @@
+# 1) Overwrite helpers
+@'
+{{- define "django-app.name" -}}
+{{- default .Chart.Name .Values.nameOverride | trunc 63 | trimSuffix "-" -}}
+{{- end }}
+
+{{- define "django-app.fullname" -}}
+{{- if .Values.fullnameOverride -}}
+{{- .Values.fullnameOverride | trunc 63 | trimSuffix "-" -}}
+{{- else -}}
+{{- printf "%s-%s" .Release.Name (include "django-app.name" .) | trunc 63 | trimSuffix "-" -}}
+{{- end -}}
+{{- end }}
+
+{{- define "django-app.labels" -}}
+app.kubernetes.io/name: {{ include "django-app.name" . }}
+app.kubernetes.io/instance: {{ .Release.Name }}
+app.kubernetes.io/version: {{ .Chart.AppVersion }}
+app.kubernetes.io/managed-by: {{ .Release.Service }}
+{{- end }}
+
+{{- define "django-app.selectorLabels" -}}
+app.kubernetes.io/name: {{ include "django-app.name" . }}
+app.kubernetes.io/instance: {{ .Release.Name }}
+{{- end }}
+
+{{- define "django-app.serviceAccountName" -}}
+{{- if .Values.serviceAccount.name -}}
+{{- .Values.serviceAccount.name -}}
+{{- else -}}
+{{- include "django-app.fullname" . -}}-sa
+{{- end -}}
+{{- end -}}
+'@ | Set-Content -Path .\apps\django-app\templates\_helpers.tpl -Encoding utf8
+
+# 2) Overwrite deployment template
+@'
+[PUT THE DEPLOYMENT TEMPLATE CONTENT HERE — use the deployment content I provided earlier]
+'@ | Set-Content -Path .\apps\django-app\templates\deployment.yaml -Encoding utf8
+
+# 3) Overwrite migrate-job template
+@'
+[PUT THE MIGRATE-JOB TEMPLATE CONTENT HERE — use the migrate-job content I provided earlier]
+'@ | Set-Content -Path .\apps\django-app\templates\migrate-job.yaml -Encoding utf8
+
+# 4) Overwrite serviceaccount template
+@'
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: {{ include "django-app.serviceAccountName" . | trim }}
+  labels:
+    {{- include "django-app.labels" . | nindent 4 }}
+automountServiceAccountToken: true
+'@ | Set-Content -Path .\apps\django-app\templates\serviceaccount.yaml -Encoding utf8
+
+# 5) Set gitSha in values.yaml (replace with your commit SHA)
+(Get-Content .\apps\django-app\values.yaml) -replace 'gitSha:.*','gitSha: "e0381ee8dbc351799949c7d07d5f039c3ba714a6"' |
+  Set-Content .\apps\django-app\values.yaml -Encoding utf8
+
+# 6) Verify local helm render
+cd .\apps\django-app
+helm template . --name-template django-app --namespace default --values values.yaml --debug | Select-String -Pattern 'serviceAccountName:|image:' -Context 0,0
+
+# 7) Commit and push
+cd ..\..
+git add apps/django-app/templates/_helpers.tpl apps/django-app/templates/deployment.yaml apps/django-app/templates/migrate-job.yaml apps/django-app/templates/serviceaccount.yaml apps/django-app/values.yaml
+git commit -m "Fix YAML rendering and set gitSha for image tag"
+git push
+
+# 8) Force Argo CD refresh
+kubectl -n argocd annotate application django-app argocd.argoproj.io/refresh=hard --overwrite
