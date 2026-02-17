@@ -18,7 +18,7 @@ replicaCount: 1
 # -------------------------------------------------------------------
 image:
   repository: ghcr.io/jaosullivan/django-app
-  tag: "{{ .Values.gitSha | quote }}"
+  tag: e0381ee8dbc351799949c7d07d5f039c3ba714a6
   pullPolicy: IfNotPresent
 
 imagePullSecrets:
@@ -27,7 +27,7 @@ imagePullSecrets:
 # -------------------------------------------------------------------
 # Git metadata
 # -------------------------------------------------------------------
-gitSha: "e0381ee8dbc351799949c7d07d5f039c3ba714a6"
+gitSha: e0381ee8dbc351799949c7d07d5f039c3ba714a6
 appVersion: "dev"
 
 # -------------------------------------------------------------------
@@ -69,7 +69,7 @@ env:
     value: "{{ .Values.appVersion }}"
 
   - name: GIT_SHA
-    value: "{{ .Values.gitSha | quote }}"
+    value: "e0381ee8dbc351799949c7d07d5f039c3ba714a6"
 
 secretEnv: {}
 
@@ -136,7 +136,7 @@ migrate:
   enabled: true
   image:
     repository: ghcr.io/jaosullivan/django-app
-    tag: "{{ .Values.gitSha | quote }}"
+    tag: e0381ee8dbc351799949c7d07d5f039c3ba714a6
     pullPolicy: IfNotPresent
   # keep other migrate settings here if needed
 
