@@ -19,7 +19,7 @@ replicaCount: 1
 # -------------------------------------------------------------------
 image:
   repository: ghcr.io/jaosullivan/django-app
-  tag: "{{ .Values.gitSha }}"
+  tag: "{{ .Values.gitSha | quote }}"
   pullPolicy: IfNotPresent
 
 imagePullSecrets:
@@ -70,7 +70,7 @@ env:
     value: "{{ .Values.appVersion }}"
 
   - name: GIT_SHA
-    value: "{{ .Values.gitSha }}"
+    value: "{{ .Values.gitSha | quote }}"
 
 secretEnv: {}
 
@@ -137,5 +137,5 @@ migrate:
   enabled: true
   image:
     repository: ghcr.io/jaosullivan/django-app
-    tag: "{{ .Values.gitSha }}"
+    tag: "{{ .Values.gitSha | quote }}"
     pullPolicy: IfNotPresent
