@@ -1,3 +1,7 @@
+{{- if and .Values.blueGreen.enabled (not (has .Values.color .Values.blueGreen.colors)) }}
+{{- fail (printf "Invalid .Values.color '%s'. Must be one of: %s" .Values.color (join ", " .Values.blueGreen.colors)) }}
+{{- end }}
+
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -63,6 +67,26 @@ spec:
           volumeMounts:
             {{- toYaml . | nindent 12 }}
           {{- end }}
+          env:
+            {{- range .Values.env }}
+            - name: {{ .name }}
+              {{- if .value }}
+              value: "{{ .value }}"
+              {{- end }}
+              {{- if .valueFrom }}
+              valueFrom:
+                {{- toYaml .valueFrom | nindent 16 }}
+              {{- end }}
+            {{- end }}
+            {{- if .Values.secretEnv }}
+            {{- range $key, $value := .Values.secretEnv }}
+            - name: {{ $key }}
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "django-app.fullname" $ }}-secret
+                  key: {{ $key }}
+            {{- end }}
+            {{- end }}
       {{- with .Values.volumes }}
       volumes:
         {{- toYaml . | nindent 8 }}

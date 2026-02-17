@@ -22,9 +22,14 @@ spec:
       restartPolicy: Never
       serviceAccountName: {{ include "django-app.serviceAccountName" . }}
 
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+
       containers:
         - name: migrate
-          image: "{{ .Values.migrate.image.repository }}:{{ .Values.migrate.image.tag }}"
+          image: "{{ .Values.migrate.image.repository | default .Values.image.repository }}:{{ .Values.migrate.image.tag | default .Values.image.tag }}"
           imagePullPolicy: {{ .Values.migrate.image.pullPolicy | default .Values.image.pullPolicy }}
           command: ["python"]
           args: ["manage.py", "migrate", "--noinput"]

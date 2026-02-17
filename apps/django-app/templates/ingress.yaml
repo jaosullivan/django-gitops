@@ -37,8 +37,8 @@ spec:
             {{- end }}
             backend:
               service:
-                # Dynamic backend — Jenkins updates .Values.activeService
-                name: {{ $.Values.activeService }}
+                # Default backend (BLUE). Jenkins will patch this.
+                name: django-blue-django-app
                 port:
                   number: {{ $.Values.service.port }}
           {{- end }}

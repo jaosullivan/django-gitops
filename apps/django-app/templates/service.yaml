@@ -1,7 +1,8 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ include "django-app.fullname" . }}-{{ .Values.color }}
+  # Stable name — traffic flips via selector, not via new Services
+  name: {{ include "django-app.fullname" . }}
   labels:
     {{- include "django-app.labels" . | nindent 4 }}
     color: {{ .Values.color }}
