@@ -1,1 +1,45 @@
-[PUT THE MIGRATE-JOB TEMPLATE CONTENT HERE — use the migrate-job content I provided earlier]
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: "{{ include "django-app.fullname" . }}-migrate-{{ .Values.color }}"
+  labels:
+    {{- include "django-app.labels" . | nindent 4 }}
+    color: {{ .Values.color }}
+  annotations:
+    "helm.sh/hook": pre-install,pre-upgrade
+    "helm.sh/hook-weight": "5"
+    "helm.sh/hook-delete-policy": before-hook-creation,hook-succeeded
+
+spec:
+  backoffLimit: 3
+  template:
+    metadata:
+      labels:
+        {{- include "django-app.selectorLabels" . | nindent 8 }}
+        color: {{ .Values.color }}
+    spec:
+      restartPolicy: Never
+      serviceAccountName: {{ include "django-app.serviceAccountName" . | trim }}
+      imagePullSecrets:
+        - name: ghcr-secret
+
+      containers:
+        - name: migrate
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          command: ["python"]
+          args: ["manage.py", "migrate", "--noinput"]
+
+          env:
+            - name: POD_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            - name: POD_NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
+            - name: APP_VERSION
+              value: "{{ .Values.appVersion }}"
+            - name: GIT_SHA
+              value: "{{ .Values.gitSha | quote }}"
