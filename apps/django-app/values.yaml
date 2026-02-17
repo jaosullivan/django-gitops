@@ -19,7 +19,7 @@ replicaCount: 1
 # -------------------------------------------------------------------
 image:
   repository: ghcr.io/jaosullivan/django-app
-  tag: ${GIT_SHA}
+  tag: "{{ .Values.gitSha }}"
   pullPolicy: IfNotPresent
 
 imagePullSecrets:
@@ -137,5 +137,5 @@ migrate:
   enabled: true
   image:
     repository: ghcr.io/jaosullivan/django-app
-    tag: ${GIT_SHA}
+    tag: "{{ .Values.gitSha }}"
     pullPolicy: IfNotPresent
