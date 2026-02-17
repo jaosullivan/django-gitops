@@ -15,31 +15,26 @@ blueGreen:
 # Replica settings
 # -------------------------------------------------------------------
 replicaCount: 1
-
 # -------------------------------------------------------------------
 # Image settings
 # Jenkins/CI will typically override repository + tag
 # -------------------------------------------------------------------
 image:
   repository: ghcr.io/jaosullivan/django-app
-  tag: landingpage-v1
+  tag: ${GIT_SHA}
   pullPolicy: IfNotPresent
-
 imagePullSecrets:
   - name: ghcr-secret
-
 # -------------------------------------------------------------------
 # Git metadata (CI writes this)
 # -------------------------------------------------------------------
 gitSha: "unknown"
 appVersion: "dev"
-
 # -------------------------------------------------------------------
 # Naming
 # -------------------------------------------------------------------
 nameOverride: ""
 fullnameOverride: ""
-
 # -------------------------------------------------------------------
 # Service account
 # -------------------------------------------------------------------
@@ -48,15 +43,12 @@ serviceAccount:
   automount: true
   annotations: {}
   name: ""
-
 # Pod metadata
 podAnnotations: {}
 podLabels: {}
-
 # Security context
 podSecurityContext: {}
 securityContext: {}
-
 # -------------------------------------------------------------------
 # Environment variables injected into the Django container
 # -------------------------------------------------------------------
@@ -76,17 +68,19 @@ env:
 
   - name: GIT_SHA
     value: "{{ .Values.gitSha }}"
+<<<<<<< HEAD
 
 # Optional secret-based env
 secretEnv: {}
 
+=======
+>>>>>>> fc9f086b6ee05cfc312858f211cb5dc33b2afbeb
 # -------------------------------------------------------------------
 # Kubernetes Service
 # -------------------------------------------------------------------
 service:
   type: ClusterIP
   port: 8000
-
 # -------------------------------------------------------------------
 # Ingress (example)
 # -------------------------------------------------------------------
@@ -101,38 +95,52 @@ ingress:
         - path: /
           pathType: Prefix
   tls: []
-
 # -------------------------------------------------------------------
 # Probes, resources, autoscaling
 # -------------------------------------------------------------------
 resources: {}
+<<<<<<< HEAD
 
+=======
+# -------------------------------------------------------------------
+# Health checks
+# -------------------------------------------------------------------
+>>>>>>> fc9f086b6ee05cfc312858f211cb5dc33b2afbeb
 livenessProbe:
   httpGet:
     path: /health/
     port: http
-
 readinessProbe:
   httpGet:
     path: /health/
     port: http
+<<<<<<< HEAD
 
+=======
+# -------------------------------------------------------------------
+# Autoscaling
+# -------------------------------------------------------------------
+>>>>>>> fc9f086b6ee05cfc312858f211cb5dc33b2afbeb
 autoscaling:
   enabled: false
   minReplicas: 1
   maxReplicas: 100
   targetCPUUtilizationPercentage: 80
-
 # -------------------------------------------------------------------
 # Volumes & scheduling
 # -------------------------------------------------------------------
 volumes: []
 volumeMounts: []
+<<<<<<< HEAD
 
+=======
+# -------------------------------------------------------------------
+# Scheduling
+# -------------------------------------------------------------------
+>>>>>>> fc9f086b6ee05cfc312858f211cb5dc33b2afbeb
 nodeSelector: {}
 tolerations: []
 affinity: {}
-
 # -------------------------------------------------------------------
 # Database migration Job
 # -------------------------------------------------------------------
@@ -140,6 +148,12 @@ migrate:
   enabled: true
   # Optional overrides; normally you leave these empty to inherit from image.*
   image:
+<<<<<<< HEAD
     repository: ""
     tag: ""
     pullPolicy: ""
+=======
+    repository: ghcr.io/jaosullivan/django-app
+    tag: ${GIT_SHA}
+    pullPolicy: IfNotPresent
+>>>>>>> fc9f086b6ee05cfc312858f211cb5dc33b2afbeb
