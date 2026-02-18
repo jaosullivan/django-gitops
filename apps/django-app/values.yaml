@@ -1,6 +1,57 @@
 # -------------------------------------------------------------------
 # Blue/Green deployment identity
 # -------------------------------------------------------------------
+blueGreen:
+  enabled: true
+  colors:
+    - blue
+    - green
+
+# Which color is currently receiving traffic
+service:
+  activeColor: blue   # flip to green in Git to switch traffic
+
+# -------------------------------------------------------------------
+# Replica settings
+# -------------------------------------------------------------------
+replicaCount: 1
+
+# -------------------------------------------------------------------
+# Image settings (no SHA here — semantic tags only)
+# -------------------------------------------------------------------
+image:
+  repository: ghcr.io/jaosullivan/django-app
+  pullPolicy: IfNotPresent
+
+# Each color has its own semantic tag
+deployments:
+  blue:
+    enabled: true
+    tag: blue
+    color: blue
+
+  green:
+    enabled: true
+    tag: green
+    color: green
+
+imagePullSecrets:
+  - name: ghcr-secret
+
+# -------------------------------------------------------------------
+# Git metadata (informational only)
+# -------------------------------------------------------------------
+gitSha: ""
+appVersion: "dev"
+
+# -------------------------------------------------------------------
+# Naming
+# -------------------------------------------------------------------
+nameOverride: ""
+fullnameOverride: ""
+a# -------------------------------------------------------------------
+# Blue/Green deployment identity
+# -------------------------------------------------------------------
 color: blue
 blueGreen:
   enabled: true
@@ -18,8 +69,18 @@ replicaCount: 1
 # -------------------------------------------------------------------
 image:
   repository: ghcr.io/jaosullivan/django-app
-  tag: e0381ee8dbc351799949c7d07d5f039c3ba714a6
   pullPolicy: IfNotPresent
+
+deployments:
+  blue:
+    enabled: true
+    tag: blue
+    color: blue
+
+  green:
+    enabled: true
+    tag: green
+    color: green
 
 imagePullSecrets:
   - name: ghcr-secret
@@ -27,7 +88,7 @@ imagePullSecrets:
 # -------------------------------------------------------------------
 # Git metadata
 # -------------------------------------------------------------------
-gitSha: e0381ee8dbc351799949c7d07d5f039c3ba714a6
+gitSha: ""
 appVersion: "dev"
 
 # -------------------------------------------------------------------
@@ -69,7 +130,7 @@ env:
     value: "{{ .Values.appVersion }}"
 
   - name: GIT_SHA
-    value: "e0381ee8dbc351799949c7d07d5f039c3ba714a6"
+    value: "{{ .Values.gitSha }}"
 
 secretEnv: {}
 
@@ -79,6 +140,9 @@ secretEnv: {}
 service:
   type: ClusterIP
   port: 8000
+
+  # NEW — traffic routing switch
+  activeColor: blue
 
 # -------------------------------------------------------------------
 # Ingress
@@ -136,8 +200,107 @@ migrate:
   enabled: true
   image:
     repository: ghcr.io/jaosullivan/django-app
-    tag: e0381ee8dbc351799949c7d07d5f039c3ba714a6
     pullPolicy: IfNotPresent
-  # keep other migrate settings here if needed
+# -------------------------------------------------------------------
+# Service account
+# -------------------------------------------------------------------
+serviceAccount:
+  create: true
+  automount: true
+  annotations: {}
+  name: ""
 
-activeService: django-app-default
+podAnnotations: {}
+podLabels: {}
+
+podSecurityContext: {}
+securityContext: {}
+
+# -------------------------------------------------------------------
+# Environment variables
+# -------------------------------------------------------------------
+env:
+  - name: POD_NAME
+    valueFrom:
+      fieldRef:
+        fieldPath: metadata.name
+
+  - name: POD_NAMESPACE
+    valueFrom:
+      fieldRef:
+        fieldPath: metadata.namespace
+
+  - name: APP_VERSION
+    value: "{{ .Values.service.activeColor }}"
+
+  - name: GIT_SHA
+    value: "{{ .Values.gitSha }}"
+
+secretEnv: {}
+
+# -------------------------------------------------------------------
+# Service
+# -------------------------------------------------------------------
+service:
+  type: ClusterIP
+  port: 8000
+  activeColor: blue
+
+# -------------------------------------------------------------------
+# Ingress
+# -------------------------------------------------------------------
+ingress:
+  enabled: true
+  className: traefik
+  annotations:
+    kubernetes.io/ingress.class: traefik
+  hosts:
+    - host: django.local
+      paths:
+        - path: /
+          pathType: Prefix
+  tls: []
+
+# -------------------------------------------------------------------
+# Resources & Probes
+# -------------------------------------------------------------------
+resources: {}
+
+livenessProbe:
+  httpGet:
+    path: /health/
+    port: http
+
+readinessProbe:
+  httpGet:
+    path: /health/
+    port: http
+
+# -------------------------------------------------------------------
+# Autoscaling
+# -------------------------------------------------------------------
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 100
+  targetCPUUtilizationPercentage: 80
+
+# -------------------------------------------------------------------
+# Volumes & scheduling
+# -------------------------------------------------------------------
+volumes: []
+volumeMounts: []
+
+nodeSelector: {}
+tolerations: []
+affinity: {}
+
+# -------------------------------------------------------------------
+# Database migration Job
+# -------------------------------------------------------------------
+migrate:
+  enabled: true
+  image:
+    repository: ghcr.io/jaosullivan/django-app
+    # IMPORTANT: tag is derived from activeColor, not hardcoded
+    pullPolicy: IfNotPresent
